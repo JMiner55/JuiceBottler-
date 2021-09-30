@@ -1,8 +1,10 @@
+import java.util.ArrayList;
+import java.util.List;
+
 public class Plant implements Runnable 
 {
     // How long do we want to run the juice processing
     public static final long PROCESSING_TIME = 5 * 1000;
-
     private static final int NUM_PLANTS = 2;
 
     public static void main(String[] args)
@@ -62,31 +64,41 @@ public class Plant implements Runnable
     }
 
     public final int ORANGES_PER_BOTTLE = 3;
-
-    private final Thread thread;
+    private final int threadNum;
     private int orangesProvided;
     private int orangesProcessed;
     private volatile boolean timeToWork;
-    
-    private static final int NUM_WORKERS = 10;
+    private static final int NUM_WORKERS = 5;
     private final Thread[] workers;
+    Worker worker = new Worker(this);
+
+    // moved array list to Worker
+    // Create Array list of oranges to be processed by workers 
+    // List<Orange> orangesBeingProcessed = new ArrayList<>();  
     
     Plant(int threadNum) 
     {
+    	this.threadNum = threadNum;
         orangesProvided = 0;
         orangesProcessed = 0;
-        thread = new Thread(this, "Plant[" + threadNum + "]");
+        
+        //adds 100 oranges to the orangesBeingProcessed list 
+        for (int i= 0; i >= 100; i++) 
+        {
+        	worker.orangesBeingProcessed.add(new Orange());
+        	orangesProvided++;
+        }
         workers = new Thread[NUM_WORKERS];
     }
 
     public void startPlant() 
     {
         timeToWork = true;
-        thread.start();
         
+        // added workers to startPlant() because plant needs to be started in order for workers work
         for(int i = 0; i <NUM_WORKERS; i++)
         {
-        	workers[i] = new Thread(this, "Plant[" + thread + "] Worker [" + (i+1) + "]" );
+        	workers[i] = new Thread(this, "Plant[" +threadNum + "] Worker [" + (i+1) + "]" );
         	workers[i].start();
         }
     }
@@ -98,6 +110,7 @@ public class Plant implements Runnable
 
     public void waitToStop() 
     {
+    	// modified from waiting for the plants to stop, to waiting for workers to stop
     	for (Thread worker : workers) 
     	{
             try 
@@ -108,39 +121,44 @@ public class Plant implements Runnable
             {
                 System.err.println(worker.getName() + " stop malfunction");
             }
-    	}
-    	 	
-//        try {
-//            thread.join();
-//        } catch (InterruptedException e) {
-//            System.err.println(thread.getName() + " stop malfunction");
-//        }
+    	}	 	
     }
-
+    
     public void run() 
     {
         System.out.println(Thread.currentThread().getName() + " Processing oranges");
         
-        Worker worker = new Worker(this);
-        
         while (timeToWork) 
         {
-            worker.processEntireOrange(new Orange());
-            orangesProvided++;
-            System.out.print(".");
+        	if (Thread.currentThread() == workers[0])
+        	{
+        		worker.orangesBeingProcessed.add(new Orange());
+            	orangesProvided++;
+        	}
+        	
+        	else
+        	{
+        		Orange workingOrange = worker.orangesBeingProcessed.remove(0);  
+        		
+        		if (workingOrange != null)
+        		{
+        			if(workingOrange.getState() != Orange.State.Bottled)
+        			{
+        				worker.processPartOrange(workingOrange);     
+                    	
+                    	worker.orangesBeingProcessed.add(workingOrange);
+        			}
+        			else
+        			{
+        				worker.proecessOrangeComplete(workingOrange);
+                		orangesProcessed++;
+        			}        			
+        		}    	           	
+        	}              		       		
         }
-        System.out.println("");
         System.out.println(Thread.currentThread().getName() + " Done");
     }
 
-    public void processEntireOrange(Orange o) 
-    {
-        while (o.getState() != Orange.State.Bottled) 
-        {
-            o.runProcess();
-        }
-        orangesProcessed++;
-    }
 
     public int getProvidedOranges() 
     {

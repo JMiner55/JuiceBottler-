@@ -37,7 +37,13 @@ public class Orange
         doWork();
     }
 
-    public State getState() 
+    //Generated setState so workers can set the state instead of just getting the stateP
+    public void setState(State state) 
+    {
+		this.state = state;
+	}
+
+	public State getState() 
     {
         return state;
     }

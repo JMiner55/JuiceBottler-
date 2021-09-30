@@ -1,28 +1,28 @@
+import java.util.ArrayList;
+import java.util.List;
 
-public class Worker 
+public class Worker
 {
-
 	private Plant plt;
+	List<Orange> orangesBeingProcessed = new ArrayList<>();  
 	
 	public Worker(Plant plt) 
 	{
 		this.plt = plt;
 	}
-
-	   public void processEntireOrange(Orange o) 
+	   public void processPartOrange(Orange o) 
 	   {
-	        do 
-	        {
-	            processOrange(o);
-	        } 
-	        while (o.getState() != Orange.State.Bottled);
-	        plt.processEntireOrange(o);
-	    }
-
-	public void processOrange(Orange o) 
-	{
-		// TODO Auto-generated method stub
-		 o.runProcess();
-	}
-
+		   if (o.getState() != Orange.State.Bottled)
+		   {
+			  o.runProcess();
+		   }
+	   }
+	   
+	   public void proecessOrangeComplete(Orange o) 
+	   {
+		   if (o.getState() != Orange.State.Processed)
+		   {
+			   o.runProcess();
+		   }
+	   }
 }
