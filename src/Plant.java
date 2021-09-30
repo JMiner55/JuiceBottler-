@@ -1,6 +1,8 @@
-import java.util.ArrayList;
-import java.util.List;
-
+/**
+ * @author Professor Nate Williams
+ * modified by Jason Miner 
+ * starts and runs plants using workers to get and process oranges. 
+ */
 public class Plant implements Runnable 
 {
     // How long do we want to run the juice processing
@@ -72,10 +74,10 @@ public class Plant implements Runnable
     private final Thread[] workers;
     Worker worker = new Worker(this);
 
-    // moved array list to Worker
-    // Create Array list of oranges to be processed by workers 
-    // List<Orange> orangesBeingProcessed = new ArrayList<>();  
-    
+    /**
+     * plant constructor
+     * added for statement to add 100 oranges to the plant 
+     */
     Plant(int threadNum) 
     {
     	this.threadNum = threadNum;
@@ -91,11 +93,14 @@ public class Plant implements Runnable
         workers = new Thread[NUM_WORKERS];
     }
 
+    /**
+     * added workers to startPlant() 
+     * because plant needs to be started in order for workers work
+     */
     public void startPlant() 
     {
         timeToWork = true;
         
-        // added workers to startPlant() because plant needs to be started in order for workers work
         for(int i = 0; i <NUM_WORKERS; i++)
         {
         	workers[i] = new Thread(this, "Plant[" +threadNum + "] Worker [" + (i+1) + "]" );
@@ -108,9 +113,12 @@ public class Plant implements Runnable
         timeToWork = false;
     }
 
+    /**
+     * modified from waiting for the plants to stop, 
+     * to waiting for workers to stop
+     */
     public void waitToStop() 
     {
-    	// modified from waiting for the plants to stop, to waiting for workers to stop
     	for (Thread worker : workers) 
     	{
             try 
@@ -124,6 +132,11 @@ public class Plant implements Runnable
     	}	 	
     }
     
+    /**
+     * has 1st worker threads fetch oranges 
+     * while the rest of the worker threads process the oranges
+     * increments the counters for orangesProvided and orangesProcessed
+     */
     public void run() 
     {
         System.out.println(Thread.currentThread().getName() + " Processing oranges");
@@ -138,7 +151,7 @@ public class Plant implements Runnable
         	
         	else
         	{
-        		Orange workingOrange = worker.orangesBeingProcessed.remove(0);  
+        		Orange workingOrange = worker.get();  
         		
         		if (workingOrange != null)
         		{
@@ -146,7 +159,7 @@ public class Plant implements Runnable
         			{
         				worker.processPartOrange(workingOrange);     
                     	
-                    	worker.orangesBeingProcessed.add(workingOrange);
+                    	worker.add(workingOrange);
         			}
         			else
         			{

@@ -1,3 +1,8 @@
+/**
+ * @author Professor Nate Williams
+ * Code has not been modified.
+ * code has been formated to match the rest of the project
+ */
 public class Orange 
 {
     public enum State 

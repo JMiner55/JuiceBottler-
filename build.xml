@@ -1,4 +1,4 @@
-<project name="Plant" default="compile" basedir=".">
+<project name="JuiceBottler" default="compile" basedir=".">
   <!-- set global properties for this build -->
   <property name="src" location="src"/>
   <property name="dist" location="dist"/>
